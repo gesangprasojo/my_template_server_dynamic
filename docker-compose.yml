@@ -1,0 +1,33 @@
+version: "3.7"
+services:
+    app_router:
+        build:
+            context: .
+            args:
+                - ART_NGINX_USER=router
+                - ART_NGINX_USER_PWD=hello-1991
+                - ART_SUPERVISOR_USER=router
+                - ART_SIGNITURE=ART_12_08_2023
+                - ART_UID=1000
+            dockerfile: ./artsends_build/app_router/Dockerfile
+        image: megesangprasojo/artsends:app_router
+        command: >
+            bash -c "supervisord -c /etc/supervisord.conf;"
+        container_name: app_router
+        ports:
+            - '81:81'
+        networks:
+            - artsends_net
+        volumes:
+            - ./app_router/file_deploy/supervisord.conf:/etc/supervisord.conf
+            - ./app_router/supervisord/list_app.ini:/etc/supervisor/run.d/list_app.ini
+            # 
+            - ./app_router/file_deploy/nginx.conf:/etc/nginx/nginx.conf
+            - ./app_router/nginx/serverblock/block_conf/:/etc/nginx/router/
+            #
+            - ./file_deploy/file_template/html/index.html/:/etc/nginx/tmp_file/index.html
+            - ./app/:/area/
+        restart: always
+networks:
+    artsends_net:
+        driver: bridge
